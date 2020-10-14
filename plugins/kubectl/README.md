@@ -13,7 +13,7 @@ plugins=(... kubectl)
 
 | Alias   | Command                             | Description                                                                                      |
 |:--------|:------------------------------------|:-------------------------------------------------------------------------------------------------|
-| ku      | `kubectl`                           | The kubectl command                                                                              |
+| k       | `kubectl`                           | The kubectl command                                                                              |
 | kca     | `kubectl --all-namespaces`          | The kubectl command targeting all namespaces                                                     |
 | kaf     | `kubectl apply -f`                  | Apply a YML file                                                                                 |
 | keti    | `kubectl exec -ti`                  | Drop into an interactive terminal on a container                                                 |
@@ -22,6 +22,7 @@ plugins=(... kubectl)
 | kcsc    | `kubectl config set-context`        | Set a context entry in kubeconfig                                                                |
 | kcdc    | `kubectl config delete-context`     | Delete the specified context from the kubeconfig                                                 |
 | kccc    | `kubectl config current-context`    | Display the current-context                                                                      |
+| kcgc    | `kubectl config get-contexts` | List of contexts available
 |         |                                     | **General aliases**                                                                              |
 | kdel    | `kubectl delete`                    | Delete resources by filenames, stdin, resources and names, or by resources and label selector    |
 | kdelf   | `kubectl delete -f`                 | Delete a pod using the type and name specified in -f argument                                    |
@@ -32,7 +33,8 @@ plugins=(... kubectl)
 | kep     | `kubectl edit pods`                 | Edit pods from the default editor                                                                |
 | kdp     | `kubectl describe pods`             | Describe all pods                                                                                |
 | kdelp   | `kubectl delete pods`               | Delete all pods matching passed arguments                                                        |
-| kgpl    | `kgp -l`                            | Get pod by label. Example: `kgpl "app=myapp" -n myns`                                            |
+| kgpl    | `kgp -l`                            | Get pods by label. Example: `kgpl "app=myapp" -n myns`                                           |
+| kgpn    | `kgp -n`                            | Get pods by namespace. Example: `kgpn kube-system`                                               |
 |         |                                     | **Service management**                                                                           |
 | kgs     | `kubectl get svc`                   | List all services in ps output format                                                            |
 | kgsw    | `kgs --watch`                       | After listing all services, watch for changes                                                    |
@@ -89,3 +91,26 @@ plugins=(... kubectl)
 | keno    | `kubectl edit node`                 | Edit nodes resource from the default editor                                                      |
 | kdno    | `kubectl describe node`             | Describe node resource in detail                                                                 |
 | kdelno  | `kubectl delete node`               | Delete the node                                                                                  |
+|         |                                   | **Persistent Volume Claim management**                                                           |
+| kgpvc   | `kubectl get pvc`                   | List all PVCs                                                                                    |
+| kgpvcw  | `kgpvc --watch`                     | After listing/getting the requested object, watch for changes                                    |
+| kepvc   | `kubectl edit pvc`                  | Edit pvcs from the default editor                                                                |
+| kdpvc   | `kubectl describe pvc`              | Descirbe all pvcs                                                                                |
+| kdelpvc | `kubectl delete pvc`                | Delete all pvcs matching passed arguments                                                        |
+|         |                                     |                                                                                                  |
+| kgss    | `kubectl get statefulset`           | List the statefulsets in ps format                                                               |
+| kgssw   | `kgss --watch`                      | After getting the list of statefulsets, watch for changes                                        |
+| kgsswide| `kgss -o wide`                      | After getting the statefulsets, output in plain-text format with any additional information      |
+| kess    | `kubectl edit statefulset`          | Edit statefulset resource from the default editor                                                |
+| kdss    | `kubectl describe statefulset`      | Describe statefulset resource in detail                                                          |
+| kdelss  | `kubectl delete statefulset`        | Delete the statefulset                                                                           |
+| ksss    | `kubectl scale statefulset`         | Scale a statefulset                                                                              |
+| krsss   | `kubectl rollout status statefulset`| Check the rollout status of a deployment                                                         |
+
+## Wrappers
+
+This plugin provides 3 wrappers to colorize kubectl output in JSON and YAML using various tools (which must be installed):
+
+- `kj`: JSON, colorized with [`jq`](https://stedolan.github.io/jq/).
+- `kjx`: JSON, colorized with [`fx`](https://github.com/antonmedv/fx).
+- `ky`: YAML, colorized with [`yh`](https://github.com/andreazorzetto/yh).
