@@ -171,15 +171,15 @@ prompt_status() {
 
 # Main Prompt
 build_prompt() {
-  local _beg_time=$(date +%s%N) # nanosecond
+  #local _beg_time=$(date +%s%N) # nanosecond
   RETVAL=$?
   prompt_status
   prompt_userhost
   prompt_cwd
   prompt_git
   prompt_end
-  local _end_time=$(date +%s%N) # nanosecond
-  echo "EST=$[(_end_time - _beg_time)/1000000]ms"
+  #local _end_time=$(date +%s%N) # nanosecond
+  #echo "EST=$[(_end_time - _beg_time)/1000000]ms"
 }
 
 PROMPT='%{%f%b%k%}$(build_prompt) '
