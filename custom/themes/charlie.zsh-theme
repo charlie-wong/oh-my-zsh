@@ -1,7 +1,8 @@
-# Reference
-# Powerline Font    https://github.com/powerline/fonts
-#                   []     $'\ue0a0'     U+E0A0
-# Font Awesome      https://github.com/FortAwesome/Font-Awesome
+# In order for this theme to render correctly, you should 
+# install [Powerline Font](https://github.com/powerline/fonts)
+# []     $'\ue0a0'     U+E0A0
+
+# ZSH Docs
 # Prompt Sequences  http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html
 
 # Goals
@@ -29,14 +30,15 @@ HIGHTLIGHT_PROMPT='true'
   UC_HAS_JOBS="%{%F{cyan}%}⚙"     # U+2699
   # https://unicode-table.com/en/27A4/
   UC_SEPARATOR="➤"                # U+27A4
+  # https://unicode-table.com/en/27A4/
+  UC_HAS_STAGED="✚"               # 
+  # https://unicode-table.com/en/27A4/
+  UC_HAS_UNSTAGED="±"             # 
+
   # https://unicode-table.com/cn/26D5/
-  UC_BRANCH="⛕"                   # U+26D5
+  #UC_BRANCH="⛕"                  # U+26D5
   # https://unicode-table.com/cn/blocks/private-use-area/
-  #UC_BRANCH=""                  # U+E0A0
-  #
-  UC_HAS_STAGED="✚"
-  #
-  UC_HAS_UNSTAGED="±"
+  UC_BRANCH=""                   # U+E0A0
 }
 
 # Utility functions to make it easy and re-usable to draw segmented prompts.
@@ -76,57 +78,57 @@ prompt_git() {
   fi
 
   if [[ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" = "true" ]]; then
-    local mode
-    local repo_path=$(git rev-parse --git-dir 2>/dev/null)
-    if [[ -e "${repo_path}/BISECT_LOG" ]]; then
-      mode=" <B>"
-    elif [[ -e "${repo_path}/MERGE_HEAD" ]]; then
-      mode=" >M<"
-    elif [[ -e "${repo_path}/rebase" || -e "${repo_path}/rebase-apply" || -e "${repo_path}/rebase-merge" || -e "${repo_path}/../.dotest" ]]; then
-      mode=" >R>"
-    fi
-
     setopt promptsubst
     autoload -Uz vcs_info
+    # http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html
+    # http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html#Character-Highlighting
     # https://git-scm.com/book/en/v2/Appendix-A%3A-Git-in-Other-Environments-Git-in-Zsh
     # http://zsh.sourceforge.net/Doc/Release/User-Contributions.html#Version-Control-Information
-    # http://zsh.sourceforge.net/Doc/Release/User-Contributions.html#vcs_005finfo-Configuration
+    # %n  $USERNAME
+    # %F{red}   Foreground colour red
+    # %K{red}   Background colour red
+    #           black/0    red/1   green/2  yellow/3   blue/4
+    #           magenta/5  cyan/6  white/7  default/8
+    # %s        The VCS in use, like git/hg/svn/...
+    # %b        Information about the current branch
+    # %c        The value of stagedstr if staged changes in the repository
+    # %u        The value of unstagedstr if unstaged changes in the repository
+    # %a        Identifier describes the action, only valid for actionformats
 
-    zstyle ':vcs_info:*' enable git
-    zstyle ':vcs_info:*' get-revision true
-    zstyle ':vcs_info:*' check-for-changes true
-    zstyle ':vcs_info:*' stagedstr "${UC_HAS_STAGED}"
-    zstyle ':vcs_info:*' unstagedstr "${UC_HAS_UNSTAGED}"
-    zstyle ':vcs_info:*' formats '%u%c'
-    zstyle ':vcs_info:*' actionformats '%u%c'
-    vcs_info
-
-    local used_color
-    local dirty=$(parse_git_dirty)
+    local _BC_
+    local dirty=$(parse_git_dirty) # call OH-MY-ZSH function
     if [[ -n $dirty ]]; then
-      used_color='yellow'
+      _BC_='yellow'
     else
-      used_color='green'
+      _BC_='green'
     fi
+
+    # echo -n "[%K{black}%F{0}0 %F{1}1 %F{2}2 %F{3}3 %F{4}4"
+    # echo -n " %K{black}%F{5}5 %F{6}6 %F{7}7 %F{8}8 %F{9}9]"
     
-    local ref=$(git symbolic-ref HEAD 2> /dev/null) || ref="➦ $(git rev-parse --short HEAD 2> /dev/null)"
-    
+    zstyle ':vcs_info:git:*' enable git
+    zstyle ':vcs_info:git:*' check-for-changes true
+    zstyle ':vcs_info:git:*' stagedstr "${UC_HAS_STAGED}" # for %c
+    zstyle ':vcs_info:git:*' unstagedstr "${UC_HAS_UNSTAGED}" # for %u
+
     if [[ "$HIGHTLIGHT_PROMPT" = "true" ]]; then
-      prompt_msg green black " ${UC_BRANCH} "
-      prompt_msg ${used_color} black "${ref/refs\/heads\/}"
-      prompt_msg red black "${vcs_info_msg_0_%%}${mode}"
+      zstyle ':vcs_info:git:*' formats "%K{3}${UC_SEPARATOR}%K{5}%s%K{3}${UC_BRANCH}%K{${_BC_}}%b%K{1}%u%c"
+      zstyle ':vcs_info:git:*' actionformats "%K{3}${UC_SEPARATOR}%K{5}%s%K{3}${UC_BRANCH}%K{${_BC_}}%b[%a]%K{1}%u%c"
+      vcs_info # run it now
+      echo -n "${vcs_info_msg_0_}"
     else
-      prompt_msg black default " %{$fg[green]%}${UC_BRANCH} "
-      prompt_msg black black "%{$fg[${used_color}]%}${ref/refs\/heads\/}"
-      prompt_msg black black "%{$fg[red]%}${vcs_info_msg_0_%%}${mode}"
+      zstyle ':vcs_info:git:*' formats "%F{3}${UC_SEPARATOR}%F{5}%s%F{3}${UC_BRANCH}%F{${_BC_}}%b%F{1}%u%c"
+      zstyle ':vcs_info:git:*' actionformats "%K{3}${UC_SEPARATOR}%K{5}%s%K{3}${UC_BRANCH}%F{${_BC_}}%b[%a]%K{1}%u%c"
+      vcs_info # run it now
+      echo -n "${vcs_info_msg_0_}"
     fi
   fi
 }
 
 # Current Working Directory
 prompt_cwd() {
-  #local _CWDIR='%~'
-  local _CWDIR=$(basename $PWD)
+  local _CWDIR='%~'
+  #local _CWDIR=$(basename $PWD)
   [[ $_CWDIR = "$USER" ]] && _CWDIR='~'
   if [[ "$HIGHTLIGHT_PROMPT" = "true" ]]; then
     prompt_msg blue black "$_CWDIR"
@@ -139,14 +141,14 @@ prompt_cwd() {
 prompt_userhost() {
   if [[ "$USER" != "$DEFAULT_USER" || -n "$SSH_CLIENT" ]]; then
     if [[ "$HIGHTLIGHT_PROMPT" = "true" ]]; then
-      prompt_msg magenta  black "%n"
-      prompt_msg white    black "@"
-      prompt_msg green    black "%m"
-      prompt_msg yellow   black "${UC_SEPARATOR}"
+      prompt_msg magenta black "%n"
+      prompt_msg yellow  black "@"
+      prompt_msg cyan    black "%m"
+      prompt_msg yellow  black "${UC_SEPARATOR}"
     else
       prompt_msg black default "%{$fg[magenta]%}%n"
-      prompt_msg black default "%{$fg[white]%}@"
-      prompt_msg black default "%{$fg[green]%}%m"
+      prompt_msg black default "%{$fg[yellow]%}@"
+      prompt_msg black default "%{$fg[cyan]%}%m"
       prompt_msg black default "%{$fg[yellow]%}${UC_SEPARATOR}%{$reset_color%}"
     fi
   fi
@@ -169,12 +171,15 @@ prompt_status() {
 
 # Main Prompt
 build_prompt() {
+  local _beg_time=$(date +%s%N) # nanosecond
   RETVAL=$?
   prompt_status
   prompt_userhost
   prompt_cwd
   prompt_git
   prompt_end
+  local _end_time=$(date +%s%N) # nanosecond
+  echo "EST=$[(_end_time - _beg_time)/1000000]ms"
 }
 
 PROMPT='%{%f%b%k%}$(build_prompt) '
